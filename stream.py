@@ -1,3 +1,5 @@
+# # stream audio
+
 import pyaudio
 import numpy as np
 from scipy.io.wavfile import write 
