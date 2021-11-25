@@ -9,7 +9,7 @@ import utilities
 import matplotlib.pyplot as plt
 
 
-cAudioFilePath = "../voice.wav"
+cAudioFilePath = "./voice.wav"
 blockSize = 4096
 hopSize = 2048
 
