@@ -5,7 +5,6 @@ from numpy import interp
 from scipy.fftpack import fft
 from scipy.signal import windows
 import math
-import aubio
 import soundfile
 import matplotlib.pyplot as plt
 import librosa
@@ -57,6 +56,7 @@ def get_f0_from_acf(r, fs):
 
 def track_pitch_acf(x, blockSize, hopSize, fs, smoothing):
     xbs, timeInSec = block_audio(x, blockSize, hopSize, fs)
+
     all_f0 = np.array([])
     for block in xbs:
         r = comp_acf(block)
@@ -117,7 +117,6 @@ def get_onsets(x, threshold):
     flux = np.max([flux, np.zeros_like(flux)], axis=0)
     flux = flux / max(flux)
     flux = np.where(flux < threshold, 0, flux)  # setting values less than threshold to zero
-
     return flux
 
 
@@ -279,13 +278,13 @@ Main Part Of Code
 # initialise pyaudio
 p = pyaudio.PyAudio()
 
-pitch_o = aubio.pitch("default", win_s, hop_s, samplerate)
-pitch_o.set_unit("freq")
-pitch_o.set_tolerance(0.4)
-
-onset_o = aubio.onset("mkl", win_s, hop_s, samplerate)
-onset_o.set_silence(-30.0)
-onset_o.set_threshold(0.4)
+# pitch_o = aubio.pitch("default", win_s, hop_s, samplerate)
+# pitch_o.set_unit("freq")
+# pitch_o.set_tolerance(0.4)
+#
+# onset_o = aubio.onset("mkl", win_s, hop_s, samplerate)
+# onset_o.set_silence(-30.0)
+# onset_o.set_threshold(0.4)
 
 # open stream
 stream = p.open(format=pyaudio_format,
@@ -298,7 +297,7 @@ print("*** starting recording")
 audio_block = np.array([], dtype=np.float32)
 section_pitches = np.array([])
 section_onsets = np.array([])
-record_time = 5
+record_time = 2
 
 # low pass filter initializations:
 order = 3
