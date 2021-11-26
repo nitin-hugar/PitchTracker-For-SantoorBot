@@ -4,56 +4,24 @@ import scipy
 import numpy as np
 import matplotlib.pyplot as plt
 import math
-import scipy.fft
 from scipy.fft import fft
-from scipy import signal
-
-
-def  block_audio(x,blockSize,hopSize,fs):    
-    # allocate memory    
-    numBlocks = math.ceil(x.size / hopSize)    
-    xb = np.zeros([numBlocks, blockSize])    
-    # compute time stamps    
-    t = (np.arange(0, numBlocks) * hopSize) / fs    
-    x = np.concatenate((x, np.zeros(blockSize)),axis=0)    
-    for n in range(0, numBlocks):        
-        i_start = n * hopSize        
-        i_stop = np.min([x.size - 1, i_start + blockSize - 1])        
-        xb[n][np.arange(0,blockSize)] = x[np.arange(i_start, i_stop + 1)]    
-    return (xb,t)
-
-
-def compute_hann(iWindowLength):
-    return 0.5 - (0.5 * np.cos(2 * np.pi / iWindowLength * 
-np.arange(iWindowLength)))
+import utilities
 
 
 def compute_spectrogram(xb):
     numBlocks = xb.shape[0]
     afWindow = compute_hann(xb.shape[1])
-    X = np.zeros([math.ceil(xb.shape[1]/2+1), numBlocks])
-    
+    X = np.zeros([math.ceil(xb.shape[1] / 2 + 1), numBlocks])
+
     for n in range(0, numBlocks):
         # apply window
-        tmp = abs(scipy.fft.fft(xb[n,:] * afWindow))*2/xb.shape[1]
-    
+        tmp = abs(scipy.fftpack.fft(xb[n, :] * afWindow)) * 2 / xb.shape[1]
+
         # compute magnitude spectrum
-        X[:,n] = tmp[range(math.ceil(tmp.size/2+1))] 
-        X[[0,math.ceil(tmp.size/2)],n]= X[[0,math.ceil(tmp.size/2)],n]/np.sqrt(2) 
-    
+        X[:, n] = tmp[range(math.ceil(tmp.size / 2 + 1))]
+        X[[0, math.ceil(tmp.size / 2)], n] = X[[0, math.ceil(tmp.size / 2)], n] / np.sqrt(2)
+        # let's be pedantic about normalization
     return X.T
-
-
-def plot_spectrogram(spectrogram, fs, hopSize):
-    
-    t = hopSize*np.arange(spectrogram.shape[0])/fs
-    f = np.arange(0,fs/2, fs/2/spectrogram.shape[1])
-
-    plt.figure(figsize = (15, 7))
-    plt.xlabel('Time (s)')
-    plt.ylabel('Freq (Hz)')
-    plt.pcolormesh(t, f, spectrogram.T)
-    plt.show()
 
 
 def extract_spectral_flux(X):    
@@ -155,6 +123,28 @@ def extract_pitch_chroma(X, fs, tfInHz):
     pitchChroma = pitchChroma / norm
 
     return pitchChroma
+
+
+# New function
+def extract_pitch_chroma(f0c):
+    init = 48 #C3
+    pitch_classes = np.arange(init, init+12)
+
+    pitchChroma = np.zeros([12, f0c.shape[0]])
+    midi = utilities.hz2midi(f0c)
+    
+    tmp = midi-init
+    
+    for i in range(tmp.shape[0]):
+        if (tmp[i] >= 0) and (tmp[i] < 12):
+            pitchChroma[:, i] = tmp[i] + init
+        elif tmp[i] >= 12:
+            pitchChroma[:, i] = tmp[i] - (int(tmp[i]/12)*12)
+        elif tmp[i] < 0:
+            pitchChroma[:, i] = tmp[i] + ((1+int(np.abs(tmp/12)))*12)
+        
+    return pitchChroma
+
 
 def dft(x, w, N):
     """
@@ -326,7 +316,7 @@ def f0_detection_TWM(xb, w, blockSize, t, f0min, f0max, fs):
     
         if len(ipmag) != 0:
             ipfreq = fs*iploc/blockSize
-            f0c = np.argwhere((ipfreq>f0_min) & (ipfreq<f0_max))[:, 0]
+            f0c = np.argwhere((ipfreq>f0min) & (ipfreq<f0max))[:, 0]
             f0cf_block = ipfreq[f0c]
             f0c, Error = TWM(ipfreq, ipmag, f0cf_block)
             f0cf[i] = f0c
