@@ -62,4 +62,4 @@ def compute_spectrogram(xb):
         X[:, n] = tmp[range(math.ceil(tmp.size / 2 + 1))]
         X[[0, math.ceil(tmp.size / 2)], n] = X[[0, math.ceil(tmp.size / 2)], n] / np.sqrt(2)
         # let's be pedantic about normalization
-    return X
+    return X.T
