@@ -106,9 +106,9 @@ def create_voicing_mask(rmsDb, thresholdDb):
 def apply_voicing_mask(f0, mask):
     return f0 * mask
 
-def detect_silence(xb, f0, thres_dB):
-    rmsDb = extract_rmsDb(xb, thres_dB=-100)
-    mask = create_voicing_mask(rmsDb, thres_dB)
+def detect_silence(xb, f0, DB_TRUNCATION_THRESHOLD):
+    rmsDb = extract_rmsDb(xb, DB_TRUNCATION_THRESHOLD=-100)
+    mask = create_voicing_mask(rmsDb, DB_TRUNCATION_THRESHOLD)
     f0f = apply_voicing_mask(f0, mask)
     return f0f
 
