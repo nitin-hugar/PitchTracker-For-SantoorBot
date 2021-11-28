@@ -38,7 +38,7 @@ f0 = features.detect_silence(xb, f0c, thres_dB)
 
 
 # pitchChroma = features.extract_pitch_chroma(X, fs, 440.)
-pitchChroma = extract_pitch_chroma(X, fs, tfInHz)
+pitchChroma = extract_pitch_chroma(f0c)
 
 
 #plot pitch chroma

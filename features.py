@@ -89,42 +89,7 @@ def lowerBound(f_mid, Xsize, fs, notesPerOctave):
 def upperBound(f_mid, Xsize, fs, notesPerOctave):
     return 2 ** (1 / (2 * notesPerOctave)) * f_mid * 2 * (Xsize - 1) / fs
 
-
-## Mask generation function
-def generate_mask(Xsize, fs, tfInHz):
-    p = 48  # C3
-    f_mid = tfInHz * 2 ** ((p - 69) / 12)
-    numberOfOctaves = 3
-    notesPerOctave = 12
-
-    mask = np.zeros([notesPerOctave, Xsize])
-    for i in range(0, notesPerOctave):
-        bounds = np.array([lowerBound(f_mid, Xsize, fs, notesPerOctave), upperBound(f_mid, Xsize, fs, notesPerOctave)])
-        for j in range(0, numberOfOctaves):
-            noteLowerBound = np.ceil(2 ** j * bounds[0])
-            noteUpperBound = np.ceil(2 ** j * bounds[1])
-            diff = noteUpperBound - noteLowerBound
-            # avoid division by zero
-            if diff == 0:
-                diff = 1
-            mask[i, range(int(noteLowerBound), int(noteUpperBound))] = 1 / diff
-        f_mid *= 2 ** (1 / notesPerOctave)
-    return mask
-
-
-def extract_pitch_chroma(X, fs, tfInHz):
-    pitchChroma = np.zeros([12, X.shape[1]])
-    mask = generate_mask(X.shape[0], fs, tfInHz)
-    pitchChroma = np.dot(mask, X ** 2)
-
-    # Normalize to length of 1
-    norm = np.sqrt(np.square(pitchChroma).sum(axis=0, keepdims=True))
-    pitchChroma = pitchChroma / norm
-
-    return pitchChroma
-
-
-# New function
+# Pitch Chroma
 def extract_pitch_chroma(f0c):
     init = 48 #C3
     pitch_classes = np.arange(init, init+12)
