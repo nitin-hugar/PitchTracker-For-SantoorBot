@@ -80,10 +80,24 @@ def detect_silence(xb, f0, thres_dB):
     f0f = apply_voicing_mask(f0, mask)
     return f0f
 
+<<<<<<< HEAD
 
 # Get pitch chroma
 
 # New function
+=======
+# get pitch chromagram 
+
+# utility functions
+def lowerBound(f_mid, Xsize, fs, notesPerOctave):
+    return 2 ** (-1 / (2 * notesPerOctave)) * f_mid * 2 * (Xsize - 1) / fs
+
+
+def upperBound(f_mid, Xsize, fs, notesPerOctave):
+    return 2 ** (1 / (2 * notesPerOctave)) * f_mid * 2 * (Xsize - 1) / fs
+
+# Pitch Chroma
+>>>>>>> ca7e854ec75e7bf9ce630561b52ee4fe4e137fde
 def extract_pitch_chroma(f0c):
     init = 48 #C3
     pitch_classes = np.arange(init, init+12)
