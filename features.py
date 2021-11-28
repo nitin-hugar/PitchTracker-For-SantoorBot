@@ -1,3 +1,4 @@
+
 import librosa
 import scipy
 import numpy as np
@@ -9,7 +10,7 @@ import utilities
 
 def compute_spectrogram(xb):
     numBlocks = xb.shape[0]
-    afWindow = compute_hann(xb.shape[1])
+    afWindow = utilities.compute_hann(xb.shape[1])
     X = np.zeros([math.ceil(xb.shape[1] / 2 + 1), numBlocks])
 
     for n in range(0, numBlocks):
@@ -73,56 +74,14 @@ def create_voicing_mask(rmsDb, thresholdDb):
 def apply_voicing_mask(f0, mask):
     return f0 * mask
 
-def detect_silence(xb, f0, DB_TRUNCATION_THRESHOLD):
-    rmsDb = extract_rmsDb(xb, DB_TRUNCATION_THRESHOLD=-100)
-    mask = create_voicing_mask(rmsDb, DB_TRUNCATION_THRESHOLD)
+def detect_silence(xb, f0, thres_dB):
+    rmsDb = extract_rmsDb(xb, thres_dB=-100)
+    mask = create_voicing_mask(rmsDb, thres_dB)
     f0f = apply_voicing_mask(f0, mask)
     return f0f
 
-# get pitch chromagram 
 
-# utility functions
-def lowerBound(f_mid, Xsize, fs, notesPerOctave):
-    return 2 ** (-1 / (2 * notesPerOctave)) * f_mid * 2 * (Xsize - 1) / fs
-
-
-def upperBound(f_mid, Xsize, fs, notesPerOctave):
-    return 2 ** (1 / (2 * notesPerOctave)) * f_mid * 2 * (Xsize - 1) / fs
-
-
-## Mask generation function
-def generate_mask(Xsize, fs, tfInHz):
-    p = 48  # C3
-    f_mid = tfInHz * 2 ** ((p - 69) / 12)
-    numberOfOctaves = 3
-    notesPerOctave = 12
-
-    mask = np.zeros([notesPerOctave, Xsize])
-    for i in range(0, notesPerOctave):
-        bounds = np.array([lowerBound(f_mid, Xsize, fs, notesPerOctave), upperBound(f_mid, Xsize, fs, notesPerOctave)])
-        for j in range(0, numberOfOctaves):
-            noteLowerBound = np.ceil(2 ** j * bounds[0])
-            noteUpperBound = np.ceil(2 ** j * bounds[1])
-            diff = noteUpperBound - noteLowerBound
-            # avoid division by zero
-            if diff == 0:
-                diff = 1
-            mask[i, range(int(noteLowerBound), int(noteUpperBound))] = 1 / diff
-        f_mid *= 2 ** (1 / notesPerOctave)
-    return mask
-
-
-def extract_pitch_chroma(X, fs, tfInHz):
-    pitchChroma = np.zeros([12, X.shape[1]])
-    mask = generate_mask(X.shape[0], fs, tfInHz)
-    pitchChroma = np.dot(mask, X ** 2)
-
-    # Normalize to length of 1
-    norm = np.sqrt(np.square(pitchChroma).sum(axis=0, keepdims=True))
-    pitchChroma = pitchChroma / norm
-
-    return pitchChroma
-
+# Get pitch chroma
 
 # New function
 def extract_pitch_chroma(f0c):
@@ -135,12 +94,16 @@ def extract_pitch_chroma(f0c):
     tmp = midi-init
     
     for i in range(tmp.shape[0]):
+        if tmp[i] == -48:
+            pitchChroma[:, i] == 0
         if (tmp[i] >= 0) and (tmp[i] < 12):
-            pitchChroma[:, i] = tmp[i] + init
+            pitchChroma[tmp[i], i] = 1      # Velocity value
         elif tmp[i] >= 12:
-            pitchChroma[:, i] = tmp[i] - (int(tmp[i]/12)*12)
+            tmp = tmp[i] - (int(tmp[i]/12)*12)
+            pitchChroma[tmp, i] = 1         # Velocity value
         elif tmp[i] < 0:
-            pitchChroma[:, i] = tmp[i] + ((1+int(np.abs(tmp/12)))*12)
+            tmp = tmp[i] + ((1+int(np.abs(tmp/12)))*12)
+            pitchChroma[tmp, i] = 1         # Velocity value
         
     return pitchChroma
 

@@ -49,17 +49,19 @@ def compute_hann(iWindowLength):
     return 0.5 - (0.5 * np.cos(2 * np.pi / iWindowLength * np.arange(iWindowLength)))
 
 
-def compute_spectrogram(xb):
-    numBlocks = xb.shape[0]
-    afWindow = compute_hann(xb.shape[1])
-    X = np.zeros([math.ceil(xb.shape[1] / 2 + 1), numBlocks])
+def hz2midi(hz):
+    voiced = np.nonzero(hz)[0]
+    midi = np.zeros(hz.shape[0])
+    midi[voiced] = np.round(69 + 12*np.log2(hz[voiced]/440.))
+    return midi
 
-    for n in range(0, numBlocks):
-        # apply window
-        tmp = abs(scipy.fftpack.fft(xb[n, :] * afWindow)) * 2 / xb.shape[1]
 
-        # compute magnitude spectrum
-        X[:, n] = tmp[range(math.ceil(tmp.size / 2 + 1))]
-        X[[0, math.ceil(tmp.size / 2)], n] = X[[0, math.ceil(tmp.size / 2)], n] / np.sqrt(2)
-        # let's be pedantic about normalization
-    return X.T
+def plot_spectrogram(spectrogram, fs, hopSize):
+    t = hopSize*np.arange(spectrogram.shape[0])/fs
+    f = np.arange(0,fs/2, fs/2/spectrogram.shape[1])
+
+    plt.figure(figsize = (15, 7))
+    plt.xlabel('Time (s)')
+    plt.ylabel('Freq (Hz)')
+    plt.pcolormesh(t, f, spectrogram.T)
+    plt.show()
