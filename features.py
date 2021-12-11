@@ -41,7 +41,6 @@ def extract_spectral_flux(X):
             flux_frame += flux
         flux_frame = np.sqrt(flux_frame)/(X.shape[1]//2+1)
         spectral_flux[n] = flux_frame
-
     return spectral_flux
 
 def half_wave_rectification(spectral_flux):
@@ -50,7 +49,7 @@ def half_wave_rectification(spectral_flux):
     return envelope
 
 def pick_onsets(envelope, thres):
-    peaks = envelope[envelope>thres] # pick peaks ? 
+    peaks = envelope[envelope>thres] 
     return peaks
 
 def onset_detect(X, thres):
@@ -61,9 +60,9 @@ def onset_detect(X, thres):
 
 
 # get silences from audio
-
 def extract_rmsDb(xb, DB_TRUNCATION_THRESHOLD=-100):
-    rmsDb = np.maximum(20 * np.log10(np.sqrt(np.mean(xb ** 2, axis=-1))), DB_TRUNCATION_THRESHOLD)
+    print(np.all((xb==0)))
+    rmsDb = np.maximum(20 * np.log10(np.sqrt(np.mean(xb ** 2, axis=-1))), DB_TRUNCATION_THRESHOLD)  #need to handle zero blocks
     return rmsDb
 
 
@@ -75,17 +74,11 @@ def apply_voicing_mask(f0, mask):
     return f0 * mask
 
 def detect_silence(xb, f0, thres_dB):
-    rmsDb = extract_rmsDb(xb, thres_dB=-100)
+    rmsDb = extract_rmsDb(xb, DB_TRUNCATION_THRESHOLD=-100)
     mask = create_voicing_mask(rmsDb, thres_dB)
     f0f = apply_voicing_mask(f0, mask)
     return f0f
 
-<<<<<<< HEAD
-
-# Get pitch chroma
-
-# New function
-=======
 # get pitch chromagram 
 
 # utility functions
@@ -97,11 +90,11 @@ def upperBound(f_mid, Xsize, fs, notesPerOctave):
     return 2 ** (1 / (2 * notesPerOctave)) * f_mid * 2 * (Xsize - 1) / fs
 
 # Pitch Chroma
->>>>>>> ca7e854ec75e7bf9ce630561b52ee4fe4e137fde
 def extract_pitch_chroma(f0c):
     init = 48 #C3
     pitch_classes = np.arange(init, init+12)
 
+    # scale = np.array([48, 50, 51, 53, 55, 56, 58, 60]) # C_MINOR
     pitchChroma = np.zeros([12, f0c.shape[0]])
     midi = utilities.hz2midi(f0c)
     
@@ -111,13 +104,13 @@ def extract_pitch_chroma(f0c):
         if tmp[i] == -48:
             pitchChroma[:, i] == 0
         if (tmp[i] >= 0) and (tmp[i] < 12):
-            pitchChroma[tmp[i], i] = 1      # Velocity value
+            pitchChroma[int(tmp[i])-1, i] = 1      # Velocity value #tmp-1
         elif tmp[i] >= 12:
-            tmp = tmp[i] - (int(tmp[i]/12)*12)
-            pitchChroma[tmp, i] = 1         # Velocity value
+            val = tmp[i] - (int(tmp[i]/12)*12)      #changed tmp to val since there was a def error
+            pitchChroma[int(val)-1, i] = 1         # Velocity value 
         elif tmp[i] < 0:
-            tmp = tmp[i] + ((1+int(np.abs(tmp/12)))*12)
-            pitchChroma[tmp, i] = 1         # Velocity value
+            val = tmp[i] + ((1+int(np.abs(tmp[i]/12)))*12)
+            pitchChroma[int(val)-1, i] = 1         # Velocity value
         
     return pitchChroma
 
@@ -299,6 +292,8 @@ def f0_detection_TWM(xb, w, blockSize, t, f0min, f0max, fs):
             f0Errors[i] = Error
     
         if len(ipmag) == 0:
+            f0c = 0     # set to zero to account for definition error
+            Error = 0
             f0cf[i] = f0c
             f0Errors[i] = Error
             
