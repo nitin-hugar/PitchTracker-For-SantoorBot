@@ -7,7 +7,7 @@ import utilities
 import makenotes
 import utilities
 import matplotlib.pyplot as plt
-
+import numpy as np
 
 # Define variables
 
@@ -38,23 +38,32 @@ f0 = features.detect_silence(xb, f0c, thres_dB)
 
 
 # pitchChroma = features.extract_pitch_chroma(X, fs, 440.)
-pitchChroma = extract_pitch_chroma(X, fs, tfInHz)
+pitchChroma = features.extract_pitch_chroma(X, fs, tfInHz)
+
+
+
+
+
+
+
+
+
 
 
 #plot pitch chroma
-fig = plt.figure(figsize=(15, 7))
-plt.pcolormesh(pitchChroma)
-plt.title("PitchChroma")
-plt.xlabel("Blocks")
-plt.ylabel("Chroma")
-plt.savefig("pitchChroma.png")
+# fig = plt.figure(figsize=(15, 7))
+# plt.pcolormesh(pitchChroma)
+# plt.title("PitchChroma")
+# plt.xlabel("Blocks")
+# plt.ylabel("Chroma")
+# plt.savefig("pitchChroma.png")
 
-fig2 = plt.figure(figsize=(15, 7))
-plt.pcolormesh(X)
-plt.title("Spectrogram")
-plt.xlabel("Blocks")
-plt.ylabel("FrequencyBins")
-plt.savefig("Spectrogram")
+# fig2 = plt.figure(figsize=(15, 7))
+# plt.pcolormesh(X)
+# plt.title("Spectrogram")
+# plt.xlabel("Blocks")
+# plt.ylabel("FrequencyBins")
+# plt.savefig("Spectrogram")
 
 
 
