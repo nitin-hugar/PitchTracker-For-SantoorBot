@@ -14,6 +14,7 @@ def makeNotes(pitchChroma, onsetBlocks, init, hopSize, fs):
     for block in range(pitchChroma.shape[1]):
         pitches[block] = init + np.argmax(pitchChroma[:, block])
     
+    print(onsetBlocks)
     notes = np.array([])
     for onset in range(onsetBlocks.shape[0] - 1):
         notes = np.append(notes, scipy.stats.mode(pitches[onsetBlocks[onset]: onsetBlocks[onset+1]][0][0]))
