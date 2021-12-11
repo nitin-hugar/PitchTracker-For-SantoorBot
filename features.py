@@ -43,6 +43,20 @@ def extract_spectral_flux(X):
         spectral_flux[n] = flux_frame
     return spectral_flux
 
+def onset_smoothening(envelope, n):
+    # n: filter length - odd
+    fltr = np.ones(n)
+    envelope = np.append(np.zeros(n//2), envelope)
+    envelope = np.append(envelope, np.zeros(n//2))
+    filtered_envelope = np.zeros(len(envelope))
+    
+    for i in np.arange(n//2, len(envelope)-n//2):
+        block = envelope[i-n//2:i+n//2+1]
+        avg = np.dot(block, fltr)/n
+        filtered_envelope[i-n//2] = envelope[i]-avg
+        
+    return filtered_envelope
+
 def half_wave_rectification(spectral_flux):
     envelope = np.max([spectral_flux, np.zeros_like(spectral_flux)], axis = 0)
     envelope = envelope/max(envelope)
@@ -52,10 +66,14 @@ def pick_onsets(envelope, thres):
     peaks = envelope[envelope>thres] 
     return peaks
 
-def onset_detect(X, thres):
+def onset_detect(X, thres, n=5):
+    # n = moving average filter for smoothening the envelope
     spectral_flux = extract_spectral_flux(X)
-    envelope = half_wave_rectification(spectral_flux)
-    peaks = pick_onsets(envelope, thres)
+    smoothened_envelope = onset_smoothening(spectral_flux, n)
+    plt.plot(smoothened_envelope)
+    plt.show()
+    # envelope = half_wave_rectification(spectral_flux)
+    peaks = pick_onsets(smoothened_envelope, thres)
     return peaks
 
 
@@ -170,7 +188,7 @@ def peakInterp(mX, pX, ploc):
 
 def TWM(pfreq, pmag, f0c):
     """
-    Two-way mismatch algorithm for f0 detection (by Beauchamp&Maher)
+
     pfreq, pmag: peak frequencies in Hz and magnitudes,
     f0c: frequencies of f0 candidates
     returns f0, f0Error: fundamental frequency detected and its error
