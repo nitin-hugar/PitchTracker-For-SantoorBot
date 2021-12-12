@@ -1,5 +1,3 @@
-
-import librosa
 import scipy
 import numpy as np
 import matplotlib.pyplot as plt
@@ -63,19 +61,19 @@ def half_wave_rectification(spectral_flux):
     return envelope
 
 def pick_onsets(envelope, thres):
-    peaks = envelope[envelope>thres] 
+    peaks = np.where(envelope>thres)
     return peaks
 
 def onset_detect(X, thres, n=5):
     # n = moving average filter for smoothening the envelope
     spectral_flux = extract_spectral_flux(X)
     smoothened_envelope = onset_smoothening(spectral_flux, n)
-    plt.plot(smoothened_envelope)
-    plt.show()
-    # envelope = half_wave_rectification(spectral_flux)
-    peaks = pick_onsets(smoothened_envelope, thres)
+    hwr_envelope = half_wave_rectification(smoothened_envelope)
+    print (max(hwr_envelope))
+    norm_envelope = hwr_envelope/max(hwr_envelope)
+    print (max(norm_envelope))
+    peaks = pick_onsets(norm_envelope, thres)
     return peaks
-
 
 # get silences from audio
 def extract_rmsDb(xb, DB_TRUNCATION_THRESHOLD=-100):
