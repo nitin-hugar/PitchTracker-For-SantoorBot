@@ -46,7 +46,9 @@ pitchChroma = features.extract_pitch_chroma(f0)
 notes, durations = makenotes.makeNotes(pitchChroma, onsets, init=48, hopSize=hopSize, fs=fs)
 print(notes)
 notes = np.array([48, 50, 51, 53, 55, 56, 58, 60])
-durations=np.ones(8)
+# t=1.5
+# durations=np.array([t,t,t,t,t,t,t,t])
+# durations = np.ones(8)
 # midi playback
 # makenotes.midiPlayBack(0x90,notes, durations)
 print('SantoorBot index',SantoorBot.miditoIndex(notes))
