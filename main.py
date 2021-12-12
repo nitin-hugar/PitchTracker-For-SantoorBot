@@ -31,22 +31,23 @@ X = features.compute_spectrogram(xb)
 
 
 # Detect onset from STFT
+onsets = features.onset_detect(X, onsets_thres, n=5)    
 
-onsets = features.onset_detect(X, onsets_thres, n=5)     # Is onset in blocks ? 
-print(onsets)
+
 # Detect f0 using TWM
+f0c, f0err = features.f0_detection_TWM(xb, w, blockSize, t, f0min, f0max, fs)
+f0 = features.detect_silence(xb, f0c, thres_dB)
 
-# f0c, f0err = features.f0_detection_TWM(xb, w, blockSize, t, f0min, f0max, fs)
-# f0 = features.detect_silence(xb, f0c, thres_dB)
-
-
-# pitchChroma = features.extract_pitch_chroma(X, fs, 440.)
-# pitchChroma = features.extract_pitch_chroma(f0)
+# Get Pitch Chroma
+pitchChroma = features.extract_pitch_chroma(f0)
 
 
 #makeNotes
-# notes, durations = makenotes.makeNotes(pitchChroma, onsets, init=48, hopSize=hopSize, fs=fs)
-# print(notes, durations)
+notes, durations = makenotes.makeNotes(pitchChroma, onsets, init=48, hopSize=hopSize, fs=fs)
+
+
+# midi playback
+makenotes.midiPlayBack(0x90,notes, durations)
 
 
 # fig = plt.figure(figsize=(15, 7))
