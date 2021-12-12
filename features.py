@@ -68,20 +68,12 @@ def onset_detect(X, thres, n=5):
     # n = moving average filter for smoothening the envelope
     spectral_flux = extract_spectral_flux(X)
     smoothened_envelope = onset_smoothening(spectral_flux, n)
-<<<<<<< HEAD
     hwr_envelope = half_wave_rectification(smoothened_envelope)
     print (max(hwr_envelope))
     norm_envelope = hwr_envelope/max(hwr_envelope)
     print (max(norm_envelope))
     peaks = pick_onsets(norm_envelope, thres)
     return peaks
-=======
-    envelope = half_wave_rectification(smoothened_envelope)
-    # plt.plot(envelope)
-    # plt.show()
-    onsets = pick_onsets(envelope, thres)
-    return np.array(onsets)[0]
->>>>>>> e2c533420018b2aa088531c4d94a46f259ed03a5
 
 # get silences from audio
 def extract_rmsDb(xb, DB_TRUNCATION_THRESHOLD=-100):
