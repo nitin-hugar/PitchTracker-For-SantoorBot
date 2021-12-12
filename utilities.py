@@ -7,6 +7,7 @@ import math
 from scipy.io.wavfile import read as wavread
 import numpy as np
 import scipy.fftpack
+import scipy.signal
 
 
 # using functions from previous assignments
@@ -65,3 +66,7 @@ def plot_spectrogram(spectrogram, fs, hopSize):
     plt.ylabel('Freq (Hz)')
     plt.pcolormesh(t, f, spectrogram.T)
     plt.show()
+
+def smoothing_filter(f0, kernel_size=3):
+    smoothened_f0 = scipy.signal.medfilt(f0, kernel_size)
+    return smoothened_f0
