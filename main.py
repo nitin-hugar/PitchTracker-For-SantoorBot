@@ -32,8 +32,8 @@ def santoor_playback(x, fs):
     xb, timeInSec = utilities.block_audio(x, blockSize, hopSize, fs)
     X = features.compute_spectrogram(xb)
 
-    onset_times, onset_envelope = features.onset_detect(X, onsets_thres, hopSize, fs, n=5)
-    print(onset_times)
+    onset_times, onset_envelope, onset_blocks = features.onset_detect(X, onsets_thres, hopSize, fs, n=5)
+    print(onset_blocks)
     # Detect f0 using TWM
     f0c, f0err = features.f0_detection_TWM(xb, w, blockSize, t, f0min, f0max, fs)
     smoothened_f0 = utilities.smoothing_filter(f0c, 3)
@@ -41,17 +41,17 @@ def santoor_playback(x, fs):
 
     # Get Pitch Chroma
     pitchChroma = features.extract_pitch_chroma(f0)
-    plt.pcolormesh(pitchChroma)
-    plt.show()
+    # plt.pcolormesh(pitchChroma)
+    # plt.show()
 
     # makeNotes
-    notes, durations = makenotes.makeNotes(pitchChroma, onset_times, init=48, hopSize=hopSize, fs=fs)
+    notes, durations = makenotes.makeNotes(pitchChroma, onset_blocks, init=48, hopSize=hopSize, fs=fs)
 
     # santoor playback
-    print('SantoorBot index', SantoorBot.miditoIndex(notes))
-    SantoorBot.SantoorBotPlusMotifs(SantoorBot.miditoIndex(notes), durations)
-    SantoorBot.outport.close()
-    # makenotes.midiPlayBack(0x90 ,notes, durations)
+    # print('SantoorBot index', SantoorBot.miditoIndex(notes))
+    # SantoorBot.SantoorBotPlusMotifs(SantoorBot.miditoIndex(notes), durations)
+    # SantoorBot.outport.close()
+    makenotes.midiPlayBack(0x90 ,notes, durations)
 
 
 def stream_audio(recDuration):
@@ -91,7 +91,20 @@ def stream_audio(recDuration):
 
 
 if __name__ == '__main__':
-    stream_audio(5)
+    # stream_audio(5)
+
+    # Import audio:
+
+    fs, x = utilities.ToolReadAudio("flute.wav")
+    santoor_playback(x, fs)
+
+
+
+
+
+
+
+
 
 # fig = plt.figure(figsize=(15, 7))
 # plt.pcolormesh(pitchChroma)

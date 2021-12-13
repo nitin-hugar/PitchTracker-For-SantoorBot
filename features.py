@@ -87,9 +87,9 @@ def onset_detect(X, thres, hopSize, fs, n=5):
 
     search_range = 0.05
     clusters = onset_clusters(timestamps, search_range)
-    onsets = onset_from_cluster(clusters, envelope, hopSize, fs, type='max')
-
-    return onsets, envelope
+    onset_times = onset_from_cluster(clusters, envelope, hopSize, fs, type='max')
+    onset_blocks = (onset_times * fs/ hopSize).astype(int)
+    return onset_times, envelope, onset_blocks
 
 
 def onset_clusters(peaks, dist):
