@@ -11,20 +11,18 @@ import matplotlib.pyplot as plt
 import numpy as np
 import SantoorBot
 import pyaudio
-from scipy.io.wavfile import write 
-
+from scipy.io.wavfile import write
 
 
 def santoor_playback(x, fs):
-
     # Define variables
     # cAudioFilePath = "./flute.wav"
     blockSize = 4096
     hopSize = 2048
     # rec_duration = 1.0 # Block size to analyse at one go
-    onsets_thres = 0.6 # Peak picking threshold for onsets
-    t = -199 # Spectral peak detection threshold in dB for f0 estimation    t changed from -100 to -150
-    thres_dB = -40 # Voicing mask threshold in dB
+    onsets_thres = 0.6  # Peak picking threshold for onsets
+    t = -199  # Spectral peak detection threshold in dB for f0 estimation    t changed from -100 to -150
+    thres_dB = -40  # Voicing mask threshold in dB
     f0min = 80
     f0max = 2000
     w = np.hanning(blockSize)
@@ -34,28 +32,18 @@ def santoor_playback(x, fs):
     xb, timeInSec = utilities.block_audio(x, blockSize, hopSize, fs)
     X = features.compute_spectrogram(xb)
 
-    # Detect onset from STFT
-    onsets = features.onset_detect(X, onsets_thres, n=5)[0]    
-    
-
+    onset_times, onset_envelope = features.onset_detect(X, onsets_thres, hopSize, fs, n=5)
+    print(onset_times)
     # Detect f0 using TWM
     f0c, f0err = features.f0_detection_TWM(xb, w, blockSize, t, f0min, f0max, fs)
     smoothened_f0 = utilities.smoothing_filter(f0c, 3)
     f0 = features.detect_silence(xb, smoothened_f0, thres_dB)
 
-    # Plot f0
-    # plt.figure(figsize=(15, 7))
-    # plt.subplot(2, 1, 1)
-    # plt.plot(f0c)
-    # plt.subplot(2, 1, 2)
-    # plt.plot(smoothened_f0)
-    # plt.show()
-
     # Get Pitch Chroma
     pitchChroma = features.extract_pitch_chroma(f0)
 
-    #makeNotes
-    notes, durations = makenotes.makeNotes(pitchChroma, onsets, init=48, hopSize=hopSize, fs=fs)
+    # makeNotes
+    notes, durations = makenotes.makeNotes(pitchChroma, onset_times, init=48, hopSize=hopSize, fs=fs)
 
     # santoor playback
     print('SantoorBot index', SantoorBot.miditoIndex(notes))
@@ -66,7 +54,7 @@ def santoor_playback(x, fs):
 
 def stream_audio(recDuration):
     FORMAT = pyaudio.paFloat32
-    CHANNELS = 2
+    CHANNELS = 1
     fs = 44100
     hop_s = 2048
     p = pyaudio.PyAudio()
@@ -96,12 +84,9 @@ def stream_audio(recDuration):
     stream.close()
     p.terminate()
 
+
 if __name__ == '__main__':
     stream_audio(5)
-
-
-
-
 
 # fig = plt.figure(figsize=(15, 7))
 # plt.pcolormesh(pitchChroma)
@@ -121,6 +106,3 @@ if __name__ == '__main__':
 # plt.xlabel("Blocks")
 # plt.ylabel("FrequencyBins")
 # plt.savefig("Spectrogram")
-
-
-
