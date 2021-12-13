@@ -19,7 +19,7 @@ def makeNotes(pitchChroma, onsetBlocks, init, hopSize, fs):
     for onset in range(onsetBlocks.shape[0] - 1):
         notes = np.append(notes, scipy.stats.mode(pitches[onsetBlocks[onset]: onsetBlocks[onset+1]])[0][0])
     
-    durations = np.diff(onsetBlocks) * (hopSize / fs)
+    durations = np.diff(onsetBlocks) * (fs / hopSize)
     
     return np.array([notes, durations])
     
@@ -44,5 +44,5 @@ def send_midi(channel, note, velocity=80):
 def midiPlayBack(channel, notes, durations):
     for note, duration in zip(notes, durations):
         print(int(note))
-        send_midi(channel, int(note), velocity=100)
+        send_midi(channel, int(note), velocity=100) # Omit when no note or make velocity = 0 for sending any note.
         time.sleep(duration)
