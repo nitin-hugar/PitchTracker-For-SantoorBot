@@ -41,6 +41,8 @@ def santoor_playback(x, fs):
 
     # Get Pitch Chroma
     pitchChroma = features.extract_pitch_chroma(f0)
+    plt.pcolormesh(pitchChroma)
+    plt.show()
 
     # makeNotes
     notes, durations = makenotes.makeNotes(pitchChroma, onset_times, init=48, hopSize=hopSize, fs=fs)
