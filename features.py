@@ -55,25 +55,99 @@ def onset_smoothening(envelope, n):
         
     return filtered_envelope
 
+
 def half_wave_rectification(spectral_flux):
-    envelope = np.max([spectral_flux, np.zeros_like(spectral_flux)], axis = 0)
+    envelope = np.max([spectral_flux, np.zeros_like(spectral_flux)], axis=0)
     envelope = envelope/max(envelope)
     return envelope
 
+
+def convert_frames_to_time(peaks, hopSize, fs):
+    timestamps = peaks*hopSize/fs
+    return timestamps
+
+
 def pick_onsets(envelope, thres):
-    peaks = np.where(envelope>thres)
+    peaks = np.where(envelope>thres)[0]
     return peaks
 
-def onset_detect(X, thres, n=5):
+
+def onset_detect(X, thres, hopSize, fs, n=5):
     # n = moving average filter for smoothening the envelope
     spectral_flux = extract_spectral_flux(X)
     smoothened_envelope = onset_smoothening(spectral_flux, n)
-    hwr_envelope = half_wave_rectification(smoothened_envelope)
-    print (max(hwr_envelope))
-    norm_envelope = hwr_envelope/max(hwr_envelope)
-    print (max(norm_envelope))
-    peaks = pick_onsets(norm_envelope, thres)
-    return peaks
+    # smoothened_envelope = scipy.signal.medfilt(spectral_flux, n)
+    envelope = half_wave_rectification(smoothened_envelope)
+    envelope = envelope/max(envelope)
+    # plt.plot(envelope)
+    # plt.show()
+    peaks = pick_onsets(envelope, thres)
+    # print (envelope[peaks])
+    timestamps = convert_frames_to_time(peaks, hopSize, fs)
+
+    search_range = 0.05
+    clusters = onset_clusters(timestamps, search_range)
+    onsets = onset_from_cluster(clusters, envelope, hopSize, fs, type='max')
+
+    return onsets, envelope
+
+
+def onset_clusters(peaks, dist):
+    j = 0  # total counter
+    clusters = []
+    i = 0
+
+    while j + i <= len(peaks) - 1:
+        cluster = np.array([peaks[j]])
+        i = 1
+        if j == len(peaks) - 1:
+            cluster = cluster
+            clusters.append(cluster)
+
+            j += 1
+
+        elif peaks[j + 1] - peaks[j] >= dist:
+            cluster = cluster
+            j += 1
+            clusters.append(cluster)
+
+        else:
+            while (i + j) <= len(peaks) - 1 and peaks[j + i] - peaks[j + i - 1] <= dist:
+                cluster = np.append(cluster, peaks[j + i])
+                i += 1
+            j += i
+            clusters.append(cluster)
+        i = 1
+
+    return np.array(clusters)
+
+
+# Onset post processing
+def onset_from_cluster(clusters, envelope, hopSize, fs, type='max'):
+    # Types: mean and max
+
+    if type == 'max':
+        # Get the amplitude of onset from the timestamp
+        onsets = np.array([])
+
+        for c in clusters:
+            c = np.round(np.array(c * fs / hopSize)).astype('int')
+            amp = envelope[c]
+            index = np.argmax(amp)
+            onset_timestamp = c[index]
+            onsets = np.append(onsets, onset_timestamp)
+        onsets = convert_frames_to_time(onsets, hopSize, fs)
+        return onsets
+
+    if type == 'mean':
+        mean = np.array([])
+        for cluster in clusters:
+            mean_cluster = np.mean(cluster)
+            mean = np.append(mean, mean_cluster)
+            # index = np.round(np.array(c*fs/hopSize)).astype('int')
+            onsets = np.append(onsets, mean)
+        return onsets
+
 
 # get silences from audio
 def extract_rmsDb(xb, DB_TRUNCATION_THRESHOLD=-100):

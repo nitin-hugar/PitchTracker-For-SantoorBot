@@ -28,8 +28,9 @@ def makeNotes(pitchChroma, onsetBlocks, init, hopSize, fs):
 def send_midi(channel, note, velocity=80):
     midiout = rtmidi.MidiOut()
     available_ports = midiout.get_ports()
+    print(available_ports)
     if available_ports:
-        midiout.open_port(0)
+        midiout.open_port(1)
     else:
         midiout.open_virtual_port("My virtual output")
     
