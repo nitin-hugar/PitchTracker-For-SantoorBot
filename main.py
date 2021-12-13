@@ -14,7 +14,7 @@ import numpy as np
 from scipy.io.wavfile import write 
 
 
-
+ 
 def santoor_playback(x, fs):
 
     # Define variables
@@ -88,6 +88,8 @@ def stream_audio(recDuration):
 
         print("Playback\n")
         
+
+        # Main function that runs the analysis and sends midi messages to the santoor bot
         santoor_playback(x, fs)
         
         # This is where midi playback happens        
@@ -126,6 +128,3 @@ if __name__ == '__main__':
 # plt.xlabel("Blocks")
 # plt.ylabel("FrequencyBins")
 # plt.savefig("Spectrogram")
-
-
-
