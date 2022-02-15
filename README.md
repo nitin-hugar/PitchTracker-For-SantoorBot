@@ -5,7 +5,7 @@ The input audio stream is read in chunks of a specified time and then the onsets
 
 ## Block Diagram
 
-<img width="466" alt="image" src="https://user-images.githubusercontent.com/77855667/153995117-cd0e40a1-acf2-494f-9bf2-40230088ad03.png">
+<img width="939" alt="image" src="https://user-images.githubusercontent.com/77855667/153995975-6602d7f9-0fef-4cb0-897c-a92f52d92bcc.png">
 
 ## Stream Audio 
 
