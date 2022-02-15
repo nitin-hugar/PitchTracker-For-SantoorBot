@@ -1,4 +1,4 @@
-# RT_Pitchtracker
+# Pitchtracker-For-Santoor-Bot
 
 In this project, we have implemented a call and response based pitch tracker for a robotic santoor player. 
 The input audio stream is read in chunks of a specified time and then the onsets, and pitch are tracked from the audiofile. 
