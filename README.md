@@ -32,7 +32,7 @@ Steps:
 
 ## Pitch Chroma
 
-<img width="326" alt="image" src="https://user-images.githubusercontent.com/77855667/153995425-5c155475-3602-4143-9b47-bcef24f174b7.png">
+<img width="466" alt="image" src="https://user-images.githubusercontent.com/77855667/153996067-9b71b9b5-1ff0-4493-b6b6-794e3d1e408c.png">
 
 Steps: 
 
